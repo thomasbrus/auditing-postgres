@@ -11,5 +11,6 @@ Gem::Specification.new do |s|
   s.test_files  = Dir.glob('spec/auditing/postgres/*_spec.rb')
 
   s.add_runtime_dependency('activerecord', '~> 3.2.13')
-  s.add_development_dependency('rspec', '~> 2.0')
+  s.add_runtime_dependency('activerecord-postgresql-adapter')
+  s.add_development_dependency('rspec', '~> 2.13.0')
 end

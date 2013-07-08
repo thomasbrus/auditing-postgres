@@ -1,6 +1,8 @@
+require 'active_record'
+
 module Auditing
   module Postgres
-    class Modification
+    class Modification < ActiveRecord::Base
       def request_id=(id)
       end
 
