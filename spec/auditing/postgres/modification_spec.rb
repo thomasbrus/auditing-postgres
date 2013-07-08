@@ -7,9 +7,9 @@ module AuditingModificationSpecHelper
       retrieved_mods['request_id'].should == (stored_mods.request_id ? stored_mods.request_id : nil)
       retrieved_mods['object_type'].should == stored_mods.object_type
       retrieved_mods['object_id'].should == stored_mods.object_id
-      retrieved_mods['changes'].size.should == stored_mods.changes.size
-      retrieved_mods['changes'].each do |k,v|
-        stored_mods.changes[k].should == v
+      retrieved_mods['object_changes'].size.should == stored_mods.object_changes.size
+      retrieved_mods['object_changes'].each do |k,v|
+        stored_mods.object_changes[k].should == v
       end
       retrieved_mods['action'].should == stored_mods.action
       retrieved_mods['at'].should == stored_mods.at.to_time
@@ -18,8 +18,8 @@ module AuditingModificationSpecHelper
       retrieved_mods.request_id.should == (stored_mods.request_id ? stored_mods.request_id : nil)
       retrieved_mods.object_type.should == stored_mods.object_type
       retrieved_mods.object_id.should == stored_mods.object_id
-      retrieved_mods.changes.each do |key, value|
-        stored_mods.changes[key].should == value
+      retrieved_mods.object_changes.each do |key, value|
+        stored_mods.object_changes[key].should == value
       end
       retrieved_mods.action.should == stored_mods.action
       retrieved_mods.at.should == stored_mods.at.to_time
@@ -34,7 +34,7 @@ describe "with respect to modifications" do
     options = {
       :object_type => 'String',
       :object_id => 2,
-      :changes => {:length => [2, 4]},
+      :object_changes => {:length => [2, 4]},
       :action => 'put',
       :at => DateTime.now
     }
@@ -43,7 +43,7 @@ describe "with respect to modifications" do
       ret_val = mod.send(key)
       if value.is_a?(Hash)
         value.each do |k, v|
-          ret_val[k.to_s].should == v
+          ret_val[k.to_sym].should == v
         end
       else
         ret_val.should == value
@@ -59,7 +59,7 @@ describe "with respect to modifications" do
     options = {
         :object_type => 'String',
         :object_id => 2,
-        :changes => {:length => [2, 4]},
+        :object_changes => {:length => [2, 4]},
         :action => 'put',
         :at => DateTime.now.to_time
       }
@@ -79,7 +79,7 @@ describe "with respect to modifications" do
       options = {
         :object_type => 'String',
         :object_id => 2,
-        :changes => {:length => [2, 4]},
+        :object_changes => {:length => [2, 4]},
         :action => 'put',
         :at => DateTime.now.to_time
       }
@@ -103,7 +103,7 @@ describe "with respect to modifications" do
       options = {
         :object_type => 'String',
         :object_id => 2,
-        :changes => {:length => [2, 4]},
+        :object_changes => {:length => [2, 4]},
         :action => 'put',
         :at => DateTime.now.to_time
       }

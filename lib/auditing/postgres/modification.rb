@@ -1,8 +1,11 @@
 require 'active_record'
+require 'activerecord-postgres-hstore'
 
 module Auditing
   module Postgres
     class Modification < ActiveRecord::Base
+      serialize :object_changes, ActiveRecord::Coders::Hstore
+
       def request_id=(id)
       end
 
