@@ -1,5 +1,6 @@
 require 'rspec'
 require 'active_record'
+require 'active_support'
 require 'auditing/postgres'
 
 ActiveRecord::Base.establish_connection("postgres://postgres@localhost/auditing")
@@ -30,7 +31,6 @@ ActiveRecord::Base.connection.execute("
   CREATE TABLE IF NOT EXISTS requests (
     id              SERIAL,
     url             VARCHAR(1024),
-    url_parts       HSTORE,
     method          VARCHAR(255),
     params          HSTORE,
     user_id         INTEGER,
@@ -41,7 +41,6 @@ ActiveRecord::Base.connection.execute("
     PRIMARY KEY (id)
   );
 
-  CREATE INDEX ON requests (url_parts);
   CREATE INDEX ON requests (user_id);
   CREATE INDEX ON requests (real_user_id);
   CREATE INDEX ON requests (at);
@@ -52,4 +51,5 @@ ActiveRecord::Base.connection.execute("
 
 def clean_sheet
   Auditing::Postgres::Modification.destroy_all
+  Auditing::Postgres::Request.destroy_all
 end

@@ -12,28 +12,19 @@ module AuditingRequestSpecHelper
   end
 
   def compare_modifications(stored_mods, retrieved_mods)
-    if retrieved_mods.is_a?(BSON::OrderedHash)
-      retrieved_mods['_id'].should == stored_mods._id
-      retrieved_mods['request_id'].should == (stored_mods.request_id ? stored_mods.request_id : "")
-      retrieved_mods['object_type'].should == stored_mods.object_type
-      retrieved_mods['object_id'].should == stored_mods.object_id
-      retrieved_mods['changes'].size.should == stored_mods.changes.size
-      retrieved_mods['changes'].each do |k,v|
-        stored_mods.changes[k].should == v
-      end
-      retrieved_mods['action'].should == stored_mods.action
-      retrieved_mods['at'].to_s.should == stored_mods.at.to_time.to_s
-    else
-      retrieved_mods._id.should == stored_mods._id
-      retrieved_mods.request_id.should == (stored_mods.request_id ? stored_mods.request_id : "")
-      retrieved_mods.object_type.should == stored_mods.object_type
-      retrieved_mods.object_id.should == stored_mods.object_id
-      retrieved_mods.changes.each do |key, value|
-        stored_mods.changes[key].should == value
-      end
-      retrieved_mods.action.should == stored_mods.action
-      retrieved_mods.at.should == stored_mods.at.to_time
+    stored_mods.reload
+
+    retrieved_mods.id.should == stored_mods.id
+    retrieved_mods.request_id.should == (stored_mods.request_id ? stored_mods.request_id : "")
+    retrieved_mods.object_type.should == stored_mods.object_type
+    retrieved_mods.object_id.should == stored_mods.object_id
+    
+    retrieved_mods.object_changes.each do |key, value|
+      stored_mods.object_changes[key].should == value
     end
+    
+    retrieved_mods.action.should == stored_mods.action
+    retrieved_mods.at.should == stored_mods.at.to_time
   end
 end
 
@@ -82,22 +73,6 @@ describe "with respect to auditing requests" do
     # request.timestamp.should_not == BSON::Timestamp.new(0,0)
   end
 
-  it "should correctly replace Date params with Times" do
-    options = {
-      :params => {:first => Date.today}
-    }
-    request = Auditing::Postgres::Request.new(options)
-    request.params["first"].should be_instance_of(Time)
-  end
-
-  it "should correctly replace DateTime params with Time's" do
-    options = {
-      :params => {:first => DateTime.now}
-    }
-    request = Auditing::Postgres::Request.new(options)
-    request.params["first"].should be_instance_of(Time)
-  end
-
   context "with respect to saving" do
     it "should correctly save the request" do
       options = {
@@ -110,11 +85,11 @@ describe "with respect to auditing requests" do
       }
       request = Auditing::Postgres::Request.new(options)
       request.save.should be_true
-      request._id.should_not be_nil
+      request.id.should_not be_nil
 
-      Auditing::Postgres::Request.collection.count.should == 1
+      Auditing::Postgres::Request.count.should == 1
 
-      other_request = request.class.collection.find_one(:_id => request._id)
+      other_request = request.class.find(request.id)
 
       compare_requests(request, other_request)
     end
@@ -133,11 +108,11 @@ describe "with respect to auditing requests" do
       }
       @request = Auditing::Postgres::Request.new(options)
       @request.save.should be_true
-      Auditing::Postgres::Request.collection.find(:_id => @request._id).count.should == 1
+      Auditing::Postgres::Request.find(@request.id).should_not be_nil
     end
 
     it "should correctly retrieve a request by its _id" do
-      req = Auditing::Postgres::Request.find_by_id(@request._id)
+      req = Auditing::Postgres::Request.find_by_id(@request.id)
       compare_requests(@request, req)
     end
 
@@ -184,18 +159,17 @@ describe "with respect to auditing requests" do
     describe "with respect to modifications" do
       before :each do
         options = {
-          :request_id => @request._id,
+          :request_id => @request.id,
           :object_type => "Audited::Request",
-          :object_id => @request._id.to_s,
-          :changes => {:url => [@request.url, "#{@request.url}/request"]},
+          :object_id => @request.id.to_s,
+          :object_changes => {:url => [@request.url, "#{@request.url}/request"]},
           :action => 'get',
-          :at => @request_time,
-          :request_id => @request._id
+          :at => @request_time
         }
         @modification = Auditing::Postgres::Modification.new(options)
         @modification.save.should be_true
-        @modification._id.should_not be_nil
-        Auditing::Postgres::Modification.collection.count == 1
+        @modification.id.should_not be_nil
+        Auditing::Postgres::Modification.count == 1
       end
 
       it "should correctly retrieve the corresponding modifications" do
@@ -210,150 +184,6 @@ describe "with respect to auditing requests" do
         compare_modifications(@modification, @request.modifications.first)
         compare_requests(@request, @request.modifications.first.request)
       end
-    end
-
-  end
-
-  describe "with respect to urls" do
-    before :each do
-      options = {
-        :url => '/week/2011-39/staffing_agencies/123/customers/12/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 3,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      @request = Auditing::Postgres::Request.new(options)
-      @request.save.should be_true
-    end
-
-    it "should create url parts when saved" do
-      @request.url_parts.should_not be_nil
-    end
-
-    it "should create correct url parts" do
-      parts = @request.url_parts
-      parts.keys.should include "week"
-      parts.keys.should include "staffing_agencies"
-      parts.keys.should include "customers"
-      parts.keys.should include "arrangements"
-
-      parts["week"].should == "2011-39"
-      parts["staffing_agencies"].should == 123
-      parts["customers"].should == 12
-      parts["arrangements"].should == 123
-    end
-
-    it "should correctly get weeks" do
-      options = {
-        :url => '/week/2011-9/staffing_agencies/123/customers/12/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 3,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      request = Auditing::Postgres::Request.new(options)
-      request.save.should be_true
-      request.url_parts.keys.should include "week"
-      request.url_parts["week"].should == "2011-9"
-
-      options = {
-        :url => '/week/weeknumber/staffing_agencies/123/customers/12/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 3,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      request = Auditing::Postgres::Request.new(options)
-      request.save.should be_true
-      request.url_parts.keys.should_not include "week"
-    end
-
-    it "should correctly retrieve requests based on parts of the url" do
-      options = {
-        :url => '/week/2011-9/staffing_agencies/1234/customers/12/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 3,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      request = Auditing::Postgres::Request.new(options)
-      request.save.should be_true
-
-      options2 = {
-        :url => '/week/2011-9/staffing_agencies/13/customers/124/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 3,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      request2 = Auditing::Postgres::Request.new(options2)
-      request2.save.should be_true
-
-      search_options = {
-        :week => "2011-9"
-      }
-      results = Auditing::Postgres::Request.find_by_url_parts(search_options)
-      results.size.should == 2
-
-      match = (results.first._id == request._id || results.first._id == request2._id)
-      match.should be_true
-
-      search_options = {
-        :staffing_agencies => 1234
-      }
-
-      results = Auditing::Postgres::Request.find_by_url_parts(search_options)
-      results.size.should == 1
-      results.first._id.should == request._id
-
-      search_options = {
-        :week => "2011-9",
-        :arrangements => 123
-      }
-      results = Auditing::Postgres::Request.find_by_url_parts(search_options)
-      results.size.should == 2
-
-      match = (results.first._id == request._id || results.first._id == request2._id)
-      match.should be_true
-    end
-
-    it "should be possible to add extra query parts to the url_parts query" do
-       options = {
-        :url => '/week/2011-9/staffing_agencies/1234/customers/12/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 4,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      request = Auditing::Postgres::Request.new(options)
-      request.save.should be_true
-
-      options2 = {
-        :url => '/week/2011-9/staffing_agencies/13/customers/124/arrangements/123',
-        :method => 'get',
-        :params => {:test_param1 => '1', :test_param2 => '2'},
-        :user_id => 3,
-        :real_user_id => 5,
-        :at => Time.now
-      }
-      request2 = Auditing::Postgres::Request.new(options2)
-      request2.save.should be_true
-
-      search_options = {
-        :week => "2011-9"
-      }
-      results = Auditing::Postgres::Request.find_by_url_parts(search_options)
-      results.size.should == 2
-
-      results = Auditing::Postgres::Request.find_by_url_parts({:value => search_options, :user_id => 4})
-      results.size.should == 1
     end
   end
 end
