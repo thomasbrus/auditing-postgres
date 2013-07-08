@@ -11,14 +11,14 @@ module Auditing
         read_attribute(:timestamp)
       end
 
-      def request_id=(id)
-      end
+      # def request_id=(id)
+      # end
 
-      def request
-      end
+      # def request
+      # end
 
-      def request=(request)
-      end
+      # def request=(request)
+      # end
 
       def self.find_by_request(id)
         find_by_request_id(id)
@@ -44,14 +44,14 @@ module Auditing
         find_all_by_action(action)
       end
 
-      def to_hash
-      end
+      # def to_hash
+      # end
 
-      def changes=(changes)
-      end
+      # def changes=(changes)
+      # end
 
-      def self.collection_name
-      end
+      # def self.collection_name
+      # end
     end
   end
 end
