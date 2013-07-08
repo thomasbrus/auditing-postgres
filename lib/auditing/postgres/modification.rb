@@ -21,13 +21,27 @@ module Auditing
       end
 
       def self.find_by_request(id)
+        find_by_request_id(id)
       end
 
       def self.find_by_request_id(id)
+        find_all_by_request_id(id)
       end
 
       def self.find_by_day(day)
         where("at >= ? AND at < ?", day.beginning_of_day, day.end_of_day)
+      end
+
+      def self.find_by_object_type(object_type)
+        find_all_by_object_type(object_type)
+      end
+
+      def self.find_by_object_id(object_id)
+        find_all_by_object_id(object_id)
+      end
+
+      def self.find_by_action(action)
+        find_all_by_action(action)
       end
 
       def to_hash
