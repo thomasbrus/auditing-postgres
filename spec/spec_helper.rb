@@ -9,14 +9,15 @@ ActiveRecord::Base.connection.execute("
   CREATE EXTENSION IF NOT EXISTS hstore;
 
   CREATE TABLE IF NOT EXISTS modifications (
-    id SERIAL,
-    request_id INTEGER,
-    object_type VARCHAR(255) NOT NULL,
-    object_id INTEGER NOT NULL,
-    object_changes HSTORE,
-    action VARCHAR(255) NOT NULL,
-    at TIME,
-    timestamp TIMESTAMP,
+    id              SERIAL,
+    request_id      INTEGER,
+    object_type     VARCHAR(255) NOT NULL,
+    object_id       INTEGER NOT NULL,
+    object_changes  HSTORE,
+    action          VARCHAR(255) NOT NULL,
+    at              TIMESTAMP WITH TIME ZONE,
+    timestamp       TIMESTAMP WITH TIME ZONE,
+
     PRIMARY KEY (id)
   );
 
@@ -27,4 +28,8 @@ ActiveRecord::Base.connection.execute("
   CREATE INDEX ON modifications (timestamp);
 ")
 
-# TODO: index toevoegen voor 'changes'
+# TODO: Index toevoegen voor 'changes'
+
+def clean_sheet
+  Auditing::Postgres::Modification.destroy_all
+end
