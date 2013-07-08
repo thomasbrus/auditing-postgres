@@ -7,6 +7,11 @@ module Auditing
       serialize :url_parts, ActiveRecord::Coders::Hstore
       serialize :params, ActiveRecord::Coders::Hstore
 
+       def timestamp
+        write_attribute(:timestamp, DateTime.now) if read_attribute(:timestamp).nil?
+        read_attribute(:timestamp)
+      end
+
       # def url=(url)
       # end
 
