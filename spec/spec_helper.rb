@@ -29,10 +29,10 @@ ActiveRecord::Base.connection.execute("
 
   CREATE TABLE IF NOT EXISTS requests (
     id              SERIAL,
-    url             VARCHAR(255),
+    url             VARCHAR(1024),
     url_parts       HSTORE,
     method          VARCHAR(255),
-    params          VARCHAR(255),
+    params          HSTORE,
     user_id         INTEGER,
     real_user_id    INTEGER,
     at              TIMESTAMP WITH TIME ZONE,
