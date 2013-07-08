@@ -26,6 +26,26 @@ ActiveRecord::Base.connection.execute("
   CREATE INDEX ON modifications (object_id);
   CREATE INDEX ON modifications (at);
   CREATE INDEX ON modifications (timestamp);
+
+  CREATE TABLE IF NOT EXISTS requests (
+    id              SERIAL,
+    url             VARCHAR(255),
+    url_parts       HSTORE,
+    method          VARCHAR(255),
+    params          VARCHAR(255),
+    user_id         INTEGER,
+    real_user_id    INTEGER,
+    at              TIMESTAMP WITH TIME ZONE,
+    timestamp       TIMESTAMP WITH TIME ZONE,
+
+    PRIMARY KEY (id)
+  );
+
+  CREATE INDEX ON requests (url_parts);
+  CREATE INDEX ON requests (user_id);
+  CREATE INDEX ON requests (real_user_id);
+  CREATE INDEX ON requests (at);
+  CREATE INDEX ON requests (timestamp);
 ")
 
 # TODO: Index toevoegen voor 'changes'

@@ -1,6 +1,11 @@
+require 'active_record'
+require 'activerecord-postgres-hstore'
+
 module Auditing
   module Postgres
-    class Request    
+    class Request < ActiveRecord::Base
+      serialize :url_parts, ActiveRecord::Coders::Hstore
+
       def url=(url)
       end
 
