@@ -26,6 +26,10 @@ module Auditing
       def self.find_by_request_id(id)
       end
 
+      def self.find_by_day(day)
+        where("at >= ? AND at < ?", day.beginning_of_day, day.end_of_day)
+      end
+
       def to_hash
       end
 

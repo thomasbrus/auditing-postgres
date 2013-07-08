@@ -2,6 +2,8 @@ require 'spec_helper.rb'
 
 module AuditingModificationSpecHelper
   def compare_modifications(stored_mods, retrieved_mods)
+    stored_mods.reload
+
     retrieved_mods.id.should == stored_mods.id
     retrieved_mods.request_id.should == (stored_mods.request_id ? stored_mods.request_id : nil)
     retrieved_mods.object_type.should == stored_mods.object_type
@@ -76,7 +78,6 @@ describe "with respect to modifications" do
 
       mod = Auditing::Postgres::Modification.new(options)
       mod.save.should be_true
-      mod.reload
       mod.id.should_not be_nil
 
       Auditing::Postgres::Modification.count.should == 1
