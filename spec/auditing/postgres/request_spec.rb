@@ -2,24 +2,13 @@ require 'spec_helper.rb'
 
 module AuditingRequestSpecHelper
   def compare_requests(stored_request, retrieved_request)
-    if retrieved_request.is_a?(BSON::OrderedHash)
-      retrieved_request['url'].should                                      == stored_request.url
-      retrieved_request['method'].should                                   == stored_request.method
-      retrieved_request['params'].should be_instance_of(BSON::OrderedHash)
-      retrieved_request['params'].should have_key("test_param1")
-      retrieved_request['params']['test_param1'].should                    == stored_request.params['test_param1']
-      retrieved_request['params'].should have_key("test_param2")
-      retrieved_request['params']['test_param2'].should                    == stored_request.params['test_param2']
-      retrieved_request['user_id'].should                                  == stored_request.user_id
-      retrieved_request['real_user_id'].should                             == stored_request.real_user_id
-      retrieved_request['at'].gmtime.to_s.should                                  == stored_request.at.gmtime.to_s
-    else
-      retrieved_request.url == stored_request.url
-      retrieved_request.method == stored_request.method
-      retrieved_request.user_id == stored_request.user_id
-      retrieved_request.real_user_id == stored_request.real_user_id
-      retrieved_request.at == stored_request.at
-    end
+    stored_request.reload
+
+    retrieved_request.url == stored_request.url
+    retrieved_request.method == stored_request.method
+    retrieved_request.user_id == stored_request.user_id
+    retrieved_request.real_user_id == stored_request.real_user_id
+    retrieved_request.at == stored_request.at
   end
 
   def compare_modifications(stored_mods, retrieved_mods)
@@ -70,7 +59,7 @@ describe "with respect to auditing requests" do
       ret_val = request.send(key)
       if value.is_a?(Hash)
         value.each do |k, v|
-          ret_val[k.to_s].should == v
+          ret_val[k.to_sym].should == v
         end
       else
         ret_val.should == value
