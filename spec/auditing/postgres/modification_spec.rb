@@ -14,7 +14,7 @@ module AuditingModificationSpecHelper
     end
     
     retrieved_mods.action.should == stored_mods.action
-    retrieved_mods.at.should == stored_mods.at.to_time
+    retrieved_mods.performed_at.should == stored_mods.performed_at.to_time
   end
 end
 
@@ -27,7 +27,7 @@ describe "with respect to modifications" do
       :object_id => 2,
       :object_changes => {:length => [2, 4]},
       :action => 'put',
-      :at => DateTime.now
+      :performed_at => DateTime.now
     }
     mod = Auditing::Postgres::Modification.new(options)
     options.each do |key, value|
@@ -42,26 +42,6 @@ describe "with respect to modifications" do
     end
   end
 
-  # it "should have a timestamp attribute" do
-  #   Auditing::Postgres::Request.timestamped_attribute.should_not be_nil
-  # end
-
-  it "should add a timestamp value after creation" do
-    options = {
-        :object_type => 'String',
-        :object_id => 2,
-        :object_changes => {:length => [2, 4]},
-        :action => 'put',
-        :at => DateTime.now.to_time
-      }
-
-    mod = Auditing::Postgres::Modification.create(options)
-    mod.reload
-    mod.timestamp.should_not be_nil
-    # Remove this?
-    # mod.timestamp.should_not == BSON::Timestamp.new(0,0)
-  end
-
   context "with respect to saving and retrieving" do
     before :each do
       clean_sheet
@@ -73,7 +53,7 @@ describe "with respect to modifications" do
         :object_id => 2,
         :object_changes => {:length => [2, 4]},
         :action => 'put',
-        :at => DateTime.now.to_time
+        :performed_at => DateTime.now.to_time
       }
 
       mod = Auditing::Postgres::Modification.new(options)
@@ -97,7 +77,7 @@ describe "with respect to modifications" do
         :object_id => 2,
         :object_changes => {:length => [2, 4]},
         :action => 'put',
-        :at => DateTime.now.to_time
+        :performed_at => DateTime.now.to_time
       }
 
       @modification = Auditing::Postgres::Modification.new(options)

@@ -7,11 +7,6 @@ module Auditing
       serialize :object_changes, ActiveRecord::Coders::Hstore
       belongs_to :request
 
-      def timestamp
-        write_attribute(:timestamp, DateTime.now) if read_attribute(:timestamp).nil?
-        read_attribute(:timestamp)
-      end
-
       def self.find_by_request(id)
         find_by_request_id(id)
       end
@@ -21,7 +16,7 @@ module Auditing
       end
 
       def self.find_by_day(day)
-        where("at >= ? AND at < ?", day.beginning_of_day, day.end_of_day)
+        where("performed_at >= ? AND performed_at < ?", day.beginning_of_day, day.end_of_day)
       end
 
       def self.find_by_object_type(object_type)

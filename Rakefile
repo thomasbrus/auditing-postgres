@@ -16,8 +16,7 @@ namespace :db do
         object_id       INTEGER NOT NULL,
         object_changes  HSTORE,
         action          VARCHAR(255) NOT NULL,
-        at              TIMESTAMP WITH TIME ZONE,
-        timestamp       TIMESTAMP WITH TIME ZONE,
+        performed_at    TIMESTAMP WITH TIME ZONE,
 
         PRIMARY KEY (id)
       );
@@ -26,8 +25,7 @@ namespace :db do
       CREATE INDEX ON modifications (object_type);
       CREATE INDEX ON modifications (object_id);
       CREATE INDEX ON modifications (object_changes);
-      CREATE INDEX ON modifications (at);
-      CREATE INDEX ON modifications (timestamp);
+      CREATE INDEX ON modifications (performed_at);
       
       CREATE TABLE IF NOT EXISTS requests (
         id              SERIAL,
@@ -36,16 +34,14 @@ namespace :db do
         params          HSTORE,
         user_id         INTEGER,
         real_user_id    INTEGER,
-        at              TIMESTAMP WITH TIME ZONE,
-        timestamp       TIMESTAMP WITH TIME ZONE,
+        performed_at    TIMESTAMP WITH TIME ZONE,
 
         PRIMARY KEY (id)
       );
 
       CREATE INDEX ON requests (user_id);
       CREATE INDEX ON requests (real_user_id);
-      CREATE INDEX ON requests (at);
-      CREATE INDEX ON requests (timestamp);
+      CREATE INDEX ON requests (performed_at);
     ")
 
     puts "Done."

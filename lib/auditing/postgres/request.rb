@@ -5,16 +5,10 @@ module Auditing
   module Postgres
     class Request < ActiveRecord::Base
       serialize :params, ActiveRecord::Coders::Hstore
-
       has_many :modifications
 
-      def timestamp
-        write_attribute(:timestamp, DateTime.now) if read_attribute(:timestamp).nil?
-        read_attribute(:timestamp)
-      end
-
       def self.find_by_day(day)
-        where("at >= ? AND at < ?", day.beginning_of_day, day.end_of_day)
+        where("performed_at >= ? AND performed_at < ?", day.beginning_of_day, day.end_of_day)
       end
 
       def self.find_by_url(url, partial = false)
@@ -40,34 +34,6 @@ module Auditing
       def self.find_by_method(method)
         find_all_by_method(method)
       end
-
-      # def url=(url)
-      # end
-
-      # def modifications
-      # end
-
-      # def url_parts=(parts)
-      # end
-
-      # def params=(params)
-      # end
-
-      # def self.find_by_url(url, partial = false)
-      # end
-
-      # def self.find_by_url_parts(params = {}, options = {})
-      # end
-
-      # private
-      # def self.collection_name
-      # end
-
-      # def self.params_to_query_params(hash)
-      # end
-
-      # def url_to_parts(url)
-      # end
     end
   end
 end

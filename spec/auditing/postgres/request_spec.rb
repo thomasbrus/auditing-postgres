@@ -8,7 +8,7 @@ module AuditingRequestSpecHelper
     retrieved_request.method == stored_request.method
     retrieved_request.user_id == stored_request.user_id
     retrieved_request.real_user_id == stored_request.real_user_id
-    retrieved_request.at == stored_request.at
+    retrieved_request.performed_at == stored_request.performed_at
   end
 
   def compare_modifications(stored_mods, retrieved_mods)
@@ -24,7 +24,7 @@ module AuditingRequestSpecHelper
     end
     
     retrieved_mods.action.should == stored_mods.action
-    retrieved_mods.at.should == stored_mods.at.to_time
+    retrieved_mods.performed_at.should == stored_mods.performed_at.to_time
   end
 end
 
@@ -42,7 +42,7 @@ describe "with respect to auditing requests" do
       :params => {:test_param1 => '1', :test_param2 => '2'},
       :user_id => 3,
       :real_user_id => 5,
-      :at => Time.now
+      :performed_at => DateTime.now
     }
 
     request = Auditing::Postgres::Request.new(options)
@@ -58,21 +58,6 @@ describe "with respect to auditing requests" do
     end
   end
 
-  # it "should have a timestamp attribute" do
-  #   Auditing::Postgres::Request.timestamped_attribute.should_not be_nil
-  # end
-
-  it "should add a timestamp value after creation" do
-    options = {
-      :params => {:first => Date.today}
-    }
-    request = Auditing::Postgres::Request.create(options)
-    request.reload
-    request.timestamp.should_not be_nil
-    # Remove this?
-    # request.timestamp.should_not == BSON::Timestamp.new(0,0)
-  end
-
   context "with respect to saving" do
     it "should correctly save the request" do
       options = {
@@ -81,7 +66,7 @@ describe "with respect to auditing requests" do
         :params => {:test_param1 => '1', :test_param2 => '2'},
         :user_id => 3,
         :real_user_id => 5,
-        :at => Time.now
+        :performed_at => Time.now
       }
       request = Auditing::Postgres::Request.new(options)
       request.save.should be_true
@@ -104,7 +89,7 @@ describe "with respect to auditing requests" do
         :params => {:test_param1 => '1', :test_param2 => '2'},
         :user_id => 3,
         :real_user_id => 5,
-        :at => @request_time
+        :performed_at => @request_time
       }
       @request = Auditing::Postgres::Request.new(options)
       @request.save.should be_true
@@ -164,7 +149,7 @@ describe "with respect to auditing requests" do
           :object_id => @request.id.to_s,
           :object_changes => {:url => [@request.url, "#{@request.url}/request"]},
           :action => 'get',
-          :at => @request_time
+          :performed_at => @request_time
         }
         @modification = Auditing::Postgres::Modification.new(options)
         @modification.save.should be_true
