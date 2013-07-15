@@ -50,7 +50,7 @@ describe "with respect to auditing requests" do
       ret_val = request.send(key)
       if value.is_a?(Hash)
         value.each do |k, v|
-          ret_val[k.to_sym].should == v
+          ret_val[k.to_s].should == v
         end
       else
         ret_val.should == value

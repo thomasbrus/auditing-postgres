@@ -15,4 +15,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('activerecord-postgres-hstore', '~> 0.7.6')
   s.add_development_dependency('rspec', '~> 2.13.0')
   s.add_development_dependency('rake', '~> 10.1.0')
+  s.add_development_dependency('json', '1.6.8')
 end

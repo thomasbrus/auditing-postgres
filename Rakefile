@@ -2,19 +2,17 @@ require 'active_record'
 
 namespace :db do
   task :setup do
-    ActiveRecord::Base.establish_connection("postgres://postgres@localhost/auditing")
+    ActiveRecord::Base.establish_connection("postgres://postgres@localhost/pep_auditing")
 
     puts "Setting up database tables ...."
 
     ActiveRecord::Base.connection.execute("
-      CREATE EXTENSION IF NOT EXISTS hstore;
-
       CREATE TABLE IF NOT EXISTS modifications (
         id              SERIAL,
         request_id      INTEGER,
         object_type     VARCHAR(255) NOT NULL,
         object_id       INTEGER NOT NULL,
-        object_changes  HSTORE,
+        object_changes  TEXT,
         action          VARCHAR(255) NOT NULL,
         performed_at    TIMESTAMP WITH TIME ZONE,
 
@@ -31,7 +29,7 @@ namespace :db do
         id              SERIAL,
         url             VARCHAR(1024),
         method          VARCHAR(255),
-        params          HSTORE,
+        params          TEXT,
         user_id         INTEGER,
         real_user_id    INTEGER,
         performed_at    TIMESTAMP WITH TIME ZONE,
@@ -44,6 +42,6 @@ namespace :db do
       CREATE INDEX ON requests (performed_at);
     ")
 
-    puts "Done."
+    puts "Done creating tables."
   end
 end

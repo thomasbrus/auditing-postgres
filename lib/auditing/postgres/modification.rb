@@ -1,11 +1,19 @@
 require 'active_record'
 require 'activerecord-postgres-hstore'
+require 'json'
 
 module Auditing
   module Postgres
     class Modification < ActiveRecord::Base
-      serialize :object_changes, ActiveRecord::Coders::Hstore
       belongs_to :request
+
+      def object_changes=(object_changes)
+        write_attribute(:object_changes, JSON.dump(object_changes))
+      end
+
+      def object_changes
+        JSON.load(read_attribute(:object_changes))
+      end
 
       def self.find_by_request(id)
         find_by_request_id(id)

@@ -1,14 +1,23 @@
 require 'active_record'
 require 'activerecord-postgres-hstore'
+require 'json'
 
 module Auditing
   module Postgres
     class Request < ActiveRecord::Base
-      serialize :params, ActiveRecord::Coders::Hstore
+      # serialize :params, ActiveRecord::Coders::Hstore
       has_many :modifications
 
       def self.find_by_day(day)
         where("performed_at >= ? AND performed_at < ?", day.beginning_of_day, day.end_of_day)
+      end
+
+      def params=(params)
+        write_attribute(:params, JSON.dump(params))
+      end
+
+      def params
+        JSON.load(read_attribute(:params))
       end
 
       def self.find_by_url(url, partial = false)

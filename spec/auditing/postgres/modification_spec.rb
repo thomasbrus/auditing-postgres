@@ -30,11 +30,13 @@ describe "with respect to modifications" do
       :performed_at => DateTime.now
     }
     mod = Auditing::Postgres::Modification.new(options)
+
     options.each do |key, value|
       ret_val = mod.send(key)
+
       if value.is_a?(Hash)
         value.each do |k, v|
-          ret_val[k.to_sym].should == v
+          ret_val[k.to_s].should == v
         end
       else
         ret_val.should == value
