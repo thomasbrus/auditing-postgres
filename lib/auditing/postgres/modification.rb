@@ -1,5 +1,4 @@
 require 'active_record'
-require 'activerecord-postgres-hstore'
 require 'json'
 
 module Auditing

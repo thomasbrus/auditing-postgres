@@ -1,11 +1,9 @@
 require 'active_record'
-require 'activerecord-postgres-hstore'
 require 'json'
 
 module Auditing
   module Postgres
     class Request < ActiveRecord::Base
-      # serialize :params, ActiveRecord::Coders::Hstore
       has_many :modifications
 
       def self.find_by_day(day)
