@@ -1,9 +1,10 @@
 require 'rspec'
-require 'active_record'
-require 'active_support'
 require 'auditing/postgres'
+require 'pg'
 
-ActiveRecord::Base.establish_connection("postgres://postgres@localhost/pep_auditing")
+Auditing::Postgres.configure do |config|
+  config.db = 'postgres://postgres@localhost/pep_auditing'
+end
 
 def clean_sheet
   Auditing::Postgres::Modification.destroy_all
