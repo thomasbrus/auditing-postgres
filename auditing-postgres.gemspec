@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.files       = Dir['lib/auditing/**/*.rb']
   s.test_files  = Dir.glob('spec/auditing/postgres/*_spec.rb')
 
-  s.add_runtime_dependency('activerecord', '~> 3.2.13')
-  s.add_runtime_dependency('activerecord-postgresql-adapter', '~> 0.0.1')
+  s.add_dependency('activerecord', '~> 3.2.13')
+  s.add_dependency('pg', '~> 0.15.1')
   s.add_development_dependency('rspec', '~> 2.13.0')
   s.add_development_dependency('rake', '~> 10.1.0')
   s.add_development_dependency('json', '1.6.8')
